@@ -89,19 +89,16 @@ impl GitHubProvider {
     }
 
     async fn fetch_contributor_count(&self, owner: &str, repo: &str) -> Option<u32> {
-        let url =
-            self.api_url(&format!("/repos/{owner}/{repo}/contributors?per_page=1&anon=false"));
-        let resp = self
-            .build_request(&url)
-            .send()
-            .await
-            .ok()?;
+        let url = self.api_url(&format!(
+            "/repos/{owner}/{repo}/contributors?per_page=1&anon=false"
+        ));
+        let resp = self.build_request(&url).send().await.ok()?;
 
         // Link 헤더에서 마지막 페이지 번호로 전체 수 추정
-        if let Some(link) = resp.headers().get("link").and_then(|v| v.to_str().ok()) {
-            if let Some(last) = extract_last_page(link) {
-                return Some(last as u32);
-            }
+        if let Some(link) = resp.headers().get("link").and_then(|v| v.to_str().ok())
+            && let Some(last) = extract_last_page(link)
+        {
+            return Some(last as u32);
         }
 
         // Link 헤더 없으면 실제 배열 크기 사용
@@ -165,12 +162,12 @@ impl GitHubProvider {
                 .ok()?;
 
             // 첫 응답 = closed_at (간소화, 실제로는 comments timeline 필요)
-            if let Some(closed_str) = issue.get("closed_at").and_then(|v| v.as_str()) {
-                if let Ok(closed_at) = closed_str.parse::<DateTime<Utc>>() {
-                    let hours = (closed_at - created_at).num_hours() as f64;
-                    if hours >= 0.0 {
-                        response_hours.push(hours);
-                    }
+            if let Some(closed_str) = issue.get("closed_at").and_then(|v| v.as_str())
+                && let Ok(closed_at) = closed_str.parse::<DateTime<Utc>>()
+            {
+                let hours = (closed_at - created_at).num_hours() as f64;
+                if hours >= 0.0 {
+                    response_hours.push(hours);
                 }
             }
         }
@@ -221,15 +218,14 @@ impl SignalProvider for GitHubProvider {
         };
 
         // 모든 신호를 병렬로 수집
-        let (last_commit, repo_info, contributors, release_freq, issue_response, pr_merge) =
-            tokio::join!(
-                self.fetch_last_commit(&owner, &repo),
-                self.fetch_repo_info(&owner, &repo),
-                self.fetch_contributor_count(&owner, &repo),
-                self.fetch_release_frequency(&owner, &repo),
-                self.fetch_issue_response_time(&owner, &repo),
-                self.fetch_pr_merge_rate(&owner, &repo),
-            );
+        let (last_commit, repo_info, contributors, release_freq, issue_response, pr_merge) = tokio::join!(
+            self.fetch_last_commit(&owner, &repo),
+            self.fetch_repo_info(&owner, &repo),
+            self.fetch_contributor_count(&owner, &repo),
+            self.fetch_release_frequency(&owner, &repo),
+            self.fetch_issue_response_time(&owner, &repo),
+            self.fetch_pr_merge_rate(&owner, &repo),
+        );
 
         let (is_archived, _stars) = repo_info.unwrap_or((false, 0));
 
@@ -248,12 +244,12 @@ impl SignalProvider for GitHubProvider {
 /// Link 헤더에서 마지막 페이지 번호 추출
 fn extract_last_page(link_header: &str) -> Option<usize> {
     for part in link_header.split(',') {
-        if part.contains("rel=\"last\"") {
-            if let Some(start) = part.find("page=") {
-                let rest = &part[start + 5..];
-                if let Some(end) = rest.find('>') {
-                    return rest[..end].parse().ok();
-                }
+        if part.contains("rel=\"last\"")
+            && let Some(start) = part.find("page=")
+        {
+            let rest = &part[start + 5..];
+            if let Some(end) = rest.find('>') {
+                return rest[..end].parse().ok();
             }
         }
     }

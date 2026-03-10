@@ -18,16 +18,16 @@ use tokio::sync::Semaphore;
 use tracing::warn;
 
 use cli::{Cli, Commands, OutputFormat};
+use output::OutputFormatter;
 use output::json::JsonFormatter;
 use output::table::TableFormatter;
-use output::OutputFormatter;
-use parsers::package_json::{get_project_name, PackageJsonParser};
 use parsers::DependencyParser;
-use providers::github::GitHubProvider;
-use providers::npm::{extract_github_owner_repo, NpmProvider};
-use providers::osv::OsvProvider;
+use parsers::package_json::{PackageJsonParser, get_project_name};
 use providers::MetadataProvider;
 use providers::SignalProvider;
+use providers::github::GitHubProvider;
+use providers::npm::{NpmProvider, extract_github_owner_repo};
+use providers::osv::OsvProvider;
 use scorer::HealthScorer;
 use types::{DriftReport, RawSignals, ReportSummary, RiskGrade};
 
@@ -87,10 +87,7 @@ async fn run_check(
     if !filter_packages.is_empty() {
         deps.retain(|d| filter_packages.contains(&d.name));
         if deps.is_empty() {
-            eprintln!(
-                "{}",
-                "지정한 패키지가 dependencies에 없습니다.".yellow()
-            );
+            eprintln!("{}", "지정한 패키지가 dependencies에 없습니다.".yellow());
             return Ok(());
         }
     }
@@ -109,8 +106,7 @@ async fn run_check(
     if std::env::var("GITHUB_TOKEN").is_err() {
         eprintln!(
             "{}",
-            "⚠ GITHUB_TOKEN 미설정: rate limit 60 req/h. 설정 시 5000 req/h로 확장됩니다."
-                .yellow()
+            "⚠ GITHUB_TOKEN 미설정: rate limit 60 req/h. 설정 시 5000 req/h로 확장됩니다.".yellow()
         );
     }
 
@@ -132,7 +128,7 @@ async fn run_check(
 
             tokio::spawn(async move {
                 let _permit = sem.acquire().await.expect("semaphore acquire 실패");
-                collect_and_score(&dep_name, &dep_version, &*npm, &*github, &*osv).await
+                collect_and_score(&dep_name, &dep_version, &npm, &github, &osv).await
             })
         })
         .collect();
@@ -222,8 +218,10 @@ async fn collect_and_score(
     );
 
     // 3. 신호 병합
-    let mut raw = RawSignals::default();
-    raw.is_deprecated = is_deprecated;
+    let mut raw = RawSignals {
+        is_deprecated,
+        ..Default::default()
+    };
 
     if let Ok(g) = github_signals {
         raw.last_commit = g.last_commit;

@@ -37,9 +37,7 @@ impl HealthScorer {
             self.model.calculate(&signal_scores)
         };
 
-        let grade = if raw.is_deprecated {
-            RiskGrade::Dead
-        } else if !ScoringModel::has_sufficient_data(&signal_scores) {
+        let grade = if raw.is_deprecated || !ScoringModel::has_sufficient_data(&signal_scores) {
             RiskGrade::Dead
         } else {
             RiskGrade::from_score(health_score)
@@ -74,10 +72,9 @@ fn build_summary(scores: &[SignalScore], raw: &RawSignals) -> String {
         a.score
             .partial_cmp(&b.score)
             .unwrap_or(std::cmp::Ordering::Equal)
-    }) {
-        if worst.score < 50.0 {
-            parts.push(format!("{}: {}", worst.name, worst.detail));
-        }
+    }) && worst.score < 50.0
+    {
+        parts.push(format!("{}: {}", worst.name, worst.detail));
     }
 
     // 가장 높은 점수 신호를 강점으로 표시
@@ -85,10 +82,10 @@ fn build_summary(scores: &[SignalScore], raw: &RawSignals) -> String {
         a.score
             .partial_cmp(&b.score)
             .unwrap_or(std::cmp::Ordering::Equal)
-    }) {
-        if best.score >= 80.0 && parts.len() < 2 {
-            parts.push(format!("{}: {}", best.name, best.detail));
-        }
+    }) && best.score >= 80.0
+        && parts.len() < 2
+    {
+        parts.push(format!("{}: {}", best.name, best.detail));
     }
 
     if parts.is_empty() {

@@ -1,5 +1,6 @@
 use thiserror::Error;
 
+#[allow(dead_code)]
 #[derive(Error, Debug)]
 pub enum DriftError {
     #[error("package.json을 찾을 수 없습니다: {path}")]

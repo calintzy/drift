@@ -14,11 +14,7 @@ impl OutputFormatter for TableFormatter {
         // 헤더
         output.push_str(&format!(
             "\n{}\n",
-            format!(
-                "📊 Dependency Health Report for {}",
-                report.project_name
-            )
-            .bold()
+            format!("📊 Dependency Health Report for {}", report.project_name).bold()
         ));
         output.push_str(&"━".repeat(50));
         output.push('\n');
@@ -85,17 +81,29 @@ impl OutputFormatter for TableFormatter {
 fn format_verbose_package(pkg: &PackageReport) -> String {
     let mut output = String::new();
     let grade_colored = match pkg.grade {
-        RiskGrade::Safe => format!("{:.0}/100 🟢 {}", pkg.health_score, pkg.grade.label()).green().to_string(),
-        RiskGrade::Watch => format!("{:.0}/100 🟡 {}", pkg.health_score, pkg.grade.label()).yellow().to_string(),
-        RiskGrade::Risk => format!("{:.0}/100 🟠 {}", pkg.health_score, pkg.grade.label()).truecolor(255, 165, 0).to_string(),
-        RiskGrade::Dead => format!("{:.0}/100 🔴 {}", pkg.health_score, pkg.grade.label()).red().to_string(),
+        RiskGrade::Safe => format!("{:.0}/100 🟢 {}", pkg.health_score, pkg.grade.label())
+            .green()
+            .to_string(),
+        RiskGrade::Watch => format!("{:.0}/100 🟡 {}", pkg.health_score, pkg.grade.label())
+            .yellow()
+            .to_string(),
+        RiskGrade::Risk => format!("{:.0}/100 🟠 {}", pkg.health_score, pkg.grade.label())
+            .truecolor(255, 165, 0)
+            .to_string(),
+        RiskGrade::Dead => format!("{:.0}/100 🔴 {}", pkg.health_score, pkg.grade.label())
+            .red()
+            .to_string(),
     };
 
     output.push_str(&format!("  {} ({})\n", pkg.name.bold(), grade_colored));
 
     let total = pkg.signal_scores.len();
     for (i, signal) in pkg.signal_scores.iter().enumerate() {
-        let prefix = if i == total - 1 { "└──" } else { "├──" };
+        let prefix = if i == total - 1 {
+            "└──"
+        } else {
+            "├──"
+        };
         let status = if signal.available {
             format!("{:>5.0}/100", signal.score)
         } else {

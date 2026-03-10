@@ -75,7 +75,11 @@ impl MetadataProvider for NpmProvider {
             .with_context(|| format!("npm registry API 호출 실패: {package_name}"))?;
 
         if !resp.status().is_success() {
-            anyhow::bail!("npm registry API 오류: {} for {}", resp.status(), package_name);
+            anyhow::bail!(
+                "npm registry API 오류: {} for {}",
+                resp.status(),
+                package_name
+            );
         }
 
         let json: Value = resp.json().await?;
@@ -84,7 +88,7 @@ impl MetadataProvider for NpmProvider {
             .get("repository")
             .and_then(|r| r.get("url"))
             .and_then(|u| u.as_str())
-            .map(|url| normalize_repo_url(url));
+            .map(normalize_repo_url);
 
         let deprecated = json
             .get("versions")
@@ -92,7 +96,7 @@ impl MetadataProvider for NpmProvider {
             .and_then(|versions| {
                 versions
                     .values()
-                    .last()
+                    .next_back()
                     .and_then(|v| v.get("deprecated"))
                     .map(|d| !d.is_null())
             })

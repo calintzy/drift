@@ -48,7 +48,9 @@ fn test_filter_nonexistent_package() {
         .current_dir(temp.path())
         .assert()
         .success()
-        .stderr(predicate::str::contains("지정한 패키지가 dependencies에 없습니다"));
+        .stderr(predicate::str::contains(
+            "지정한 패키지가 dependencies에 없습니다",
+        ));
 }
 
 /// 테스트 4: --include-dev 플래그 수용 확인

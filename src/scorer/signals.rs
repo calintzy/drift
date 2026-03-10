@@ -178,9 +178,7 @@ pub fn score_community(signals: &RawSignals) -> SignalScore {
     let star_score = signals
         .star_trend
         .map(|t| ((t + 1.0) * 50.0).clamp(0.0, 100.0));
-    let pr_score = signals
-        .pr_merge_rate
-        .map(|r| (r * 100.0).clamp(0.0, 100.0));
+    let pr_score = signals.pr_merge_rate.map(|r| (r * 100.0).clamp(0.0, 100.0));
 
     match (star_score, pr_score) {
         (Some(s), Some(p)) => SignalScore {

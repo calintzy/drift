@@ -38,19 +38,19 @@ impl DependencyParser for PackageJsonParser {
             }
         }
 
-        if include_dev {
-            if let Some(dev_deps) = json.get("devDependencies").and_then(|v| v.as_object()) {
-                for (name, version) in dev_deps {
-                    let version_str = version.as_str().unwrap_or("*");
-                    if version_str.starts_with("workspace:") {
-                        continue;
-                    }
-                    deps.push(Dependency {
-                        name: name.clone(),
-                        version: version_str.to_string(),
-                        dep_type: DepType::Development,
-                    });
+        if include_dev
+            && let Some(dev_deps) = json.get("devDependencies").and_then(|v| v.as_object())
+        {
+            for (name, version) in dev_deps {
+                let version_str = version.as_str().unwrap_or("*");
+                if version_str.starts_with("workspace:") {
+                    continue;
                 }
+                deps.push(Dependency {
+                    name: name.clone(),
+                    version: version_str.to_string(),
+                    dep_type: DepType::Development,
+                });
             }
         }
 

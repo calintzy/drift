@@ -6,6 +6,7 @@ use serde::Serialize;
 pub struct Dependency {
     pub name: String,
     pub version: String,
+    #[allow(dead_code)]
     pub dep_type: DepType,
 }
 
@@ -18,6 +19,7 @@ pub enum DepType {
 /// npm registry에서 가져온 패키지 메타데이터
 #[derive(Debug, Clone)]
 pub struct PackageMetadata {
+    #[allow(dead_code)]
     pub name: String,
     pub repository_url: Option<String>,
     pub deprecated: bool,

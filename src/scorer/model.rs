@@ -2,6 +2,7 @@ use crate::types::SignalScore;
 
 /// 점수 가중치 모델
 pub struct ScoringModel {
+    #[allow(dead_code)]
     pub weights: [(&'static str, f64); 7],
 }
 
