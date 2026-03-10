@@ -14,6 +14,25 @@ Drift scans your `package.json`, fetches live data from multiple sources, and cl
 
 ---
 
+## Why Drift?
+
+**Your project depends on open source libraries — but are they still alive?**
+
+- 60% of open source maintainers experience burnout (Tidelift 2024). Libraries get abandoned silently.
+- `npm audit` only checks for security vulnerabilities. It won't tell you if a library is dying.
+- By the time you notice, migration costs are already high.
+
+Drift answers one question: **"Will this library still be maintained 6 months from now?"**
+
+**When to use it:**
+
+- **Starting a new project** — Check if the libraries you're about to depend on are healthy
+- **Regular maintenance** — Scan your project periodically to catch declining dependencies early
+- **Technical debt reviews** — Generate reports with `--format json` to back up migration proposals
+- **CI pipelines** — Fail builds automatically when Risk or Dead dependencies are detected
+
+---
+
 ## Example Output
 
 ```
